@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c4cd3fa90b0b8f41af6d2e212b0d56f, type: 3}
+  m_Name: BlockC
+  m_EditorClassIdentifier: 
+  type: 3
+  prefab: {fileID: 4811228629767981300, guid: 524a348256f453948ad20c102656ffcc, type: 3}
+  spawnRatio: 1
