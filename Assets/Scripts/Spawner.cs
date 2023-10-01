@@ -6,7 +6,7 @@ public class Spawner : MonoBehaviour
 {
     public List<BlockData> AvailableBlocks = new List<BlockData>();
 
-    public BlockGroup Spawn(int x, int y, int ammount, GameObject container)
+    public BlockGroup Spawn(int x, int y, int ammount, GameObject container, GameGrid grid)
     {
         List<Block> blocks = new List<Block>();
 
@@ -18,6 +18,6 @@ public class Spawner : MonoBehaviour
             blocks.Add(blockInstance.GetComponent<Block>());
         }
 
-        return new BlockGroup { blocks = blocks };
+        return new BlockGroup(blocks, grid);
     }
 }

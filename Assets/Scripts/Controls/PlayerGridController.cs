@@ -1,18 +1,56 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Android;
+using UnityEngine.InputSystem.Interactions;
 
-public class PlayerGridController : MonoBehaviour
+public class PlayerGridController : BoardController
 {
-    // Start is called before the first frame update
-    void Start()
+    private SimpleControls m_Controls;
+    
+    public void Awake()
     {
-        
+        m_Controls = new SimpleControls();
+
+        m_Controls.puzzle.Right.performed +=
+            ctx =>
+        {
+            MoveRight();
+        };
+
+        m_Controls.puzzle.Left.performed +=
+            ctx =>
+        {
+           MoveLeft();
+        };
+
+        m_Controls.puzzle.Down.performed +=
+            ctx =>
+        {
+           MoveDown();
+        };
+
+
+        m_Controls.puzzle.RotateRight.performed +=
+            ctx =>
+        {
+           RotateRight();
+        };
+
+        m_Controls.puzzle.RotateLeft.performed +=
+            ctx =>
+        {
+           RotateLeft();
+        };
     }
 
-    // Update is called once per frame
-    void Update()
+    public void OnEnable()
     {
-        
+        m_Controls.Enable();
+    }
+
+    public void OnDisable()
+    {
+        m_Controls.Disable();
     }
 }
