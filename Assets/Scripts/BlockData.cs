@@ -5,5 +5,5 @@ public class BlockData : ScriptableObject
 {
     public BlockType type;
     public Block prefab;
-    public float spawnRatio = 1f;
+    public int spawnRatio = 1;
 }

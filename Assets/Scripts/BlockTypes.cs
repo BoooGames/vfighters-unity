@@ -5,9 +5,5 @@ public enum BlockType
     B,
     C,
     D,
-    E,
-    F,
-    G,
-    H
-
+    X
 }

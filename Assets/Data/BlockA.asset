@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   prefab: {fileID: 3201842848757920703, guid: 948494dd22de94745b99ce403a300899, type: 3}
-  spawnRatio: 1
+  spawnRatio: 10

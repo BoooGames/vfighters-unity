@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c4cd3fa90b0b8f41af6d2e212b0d56f, type: 3}
-  m_Name: BlockB
+  m_Name: Bomb_BlockA
   m_EditorClassIdentifier: 
-  type: 2
-  prefab: {fileID: -145663078263530417, guid: fca41cc897659e740b7a019e9a67ec76, type: 3}
-  spawnRatio: 10
+  type: 1
+  prefab: {fileID: 3201842848757920703, guid: ebc2fcf6d79ac8f438306737372d90e9, type: 3}
+  spawnRatio: 3

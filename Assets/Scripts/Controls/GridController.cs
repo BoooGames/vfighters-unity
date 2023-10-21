@@ -23,6 +23,7 @@ public class BoardController : MonoBehaviour
     {
         var bg =  grid.GetCurrentPiece();
         bg.SnapDown();
+        bg.MoveVertical(-1);
     }
 
     public void RotateRight()
