@@ -1,22 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Spawner : MonoBehaviour
 {
-    public List<BlockData> AvailableBlocks = new List<BlockData>();
-
-    int randomCount = 0;
-
-    void Awake()
-    {
-        randomCount = 0;
-
-        foreach (var blockData in AvailableBlocks)
-        {
-            randomCount += blockData.spawnRatio;
-        }
-    }
+    public BlockSpawnData spawnData;
 
     public (bool spawnSucceeded, BlockGroup group) Spawn(int x, int y, int ammount, GameObject container, GameGrid grid)
     {
@@ -34,9 +23,8 @@ public class Spawner : MonoBehaviour
         {
             for(int i = 0; i < ammount; i++)
             {
-                var block = GetRandomBlock();
-                var blockInstance = Instantiate(block.prefab, container.transform);
-                blockInstance.transform.localPosition = new Vector3(x + i,y,0);
+                var blockData =  spawnData.GetRandomBlock();
+                var blockInstance = Spawn(new Vector2Int(x + i,y), container, blockData.type, blockData.isBomb);
                 blocks.Add(blockInstance.GetComponent<Block>());
             }
         }
@@ -44,21 +32,19 @@ public class Spawner : MonoBehaviour
         return(canSpawn, new BlockGroup(blocks, grid));
     }
 
-    private BlockData GetRandomBlock()
+    public Block Spawn(Vector2Int position, GameObject container,  int encodedData)
     {
-        int rd = Random.Range(0, randomCount);
-        int count = 0;
+        return Spawn(position, container, encodedData.DecodeCellType(), encodedData.DecodeIsBomb(), encodedData.DecodeTimer());
+    }
 
-        foreach (var blockData in AvailableBlocks)
-        {
-            count += blockData.spawnRatio;
+    public Block Spawn(Vector2Int position, GameObject container,  BlockType b, bool isBomb, int timer = 0)
+    {
+        BlockData data = spawnData.GetDataFor(b, isBomb);
+       
+        var blockInstance = Instantiate(data.prefab, container.transform);
+        blockInstance.Initialize(b, isBomb, timer);
+        blockInstance.transform.localPosition = new Vector3(position.x,position.y,0);
 
-            if(rd < count)
-            {
-                return blockData;
-            }
-        }
-
-        return AvailableBlocks[0];
-    } 
+        return blockInstance;
+    }
 }

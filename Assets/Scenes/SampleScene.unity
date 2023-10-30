@@ -1343,6 +1343,7 @@ GameObject:
   - component: {fileID: 1732807533}
   - component: {fileID: 1732807535}
   - component: {fileID: 1732807534}
+  - component: {fileID: 1732807536}
   m_Layer: 0
   m_Name: Content
   m_TagString: Untagged
@@ -1377,16 +1378,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8690530399437a14b84b649a3bba206d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AvailableBlocks:
-  - {fileID: 11400000, guid: 2483fcc94c9b40d4d932654397e10f5a, type: 2}
-  - {fileID: 11400000, guid: 610bba0e4e05dfd419c51b67befbb340, type: 2}
-  - {fileID: 11400000, guid: 58a85b1f0ac028f4caa5678083229a9e, type: 2}
-  - {fileID: 11400000, guid: a32316d0205d683408cffbf787dff6c8, type: 2}
-  - {fileID: 11400000, guid: c57fd029ddd8cdf4fb3cd1703ba94f4a, type: 2}
-  - {fileID: 11400000, guid: 9c8e755be08fe7e46848636a42944560, type: 2}
-  - {fileID: 11400000, guid: ffba63607342c6a4282c7d61c1da6f66, type: 2}
-  - {fileID: 11400000, guid: 0916ebd7d5ebf2447bb23bd0f9af237e, type: 2}
-  - {fileID: 11400000, guid: 996d4eefec971a84f840bacd8bc49b75, type: 2}
+  spawnData: {fileID: 11400000, guid: 1df7feac0b971dd4db81936b67e75d32, type: 2}
 --- !u!114 &1732807535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1404,6 +1396,20 @@ MonoBehaviour:
   blockSize: 1
   spawner: {fileID: 1732807534}
   container: {fileID: 1732807532}
+  explodingKittens: []
+--- !u!114 &1732807536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732807532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df502fc4dd012ab4a9c2ce805721a889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawner: {fileID: 1732807534}
 --- !u!1 &2010032277
 GameObject:
   m_ObjectHideFlags: 0

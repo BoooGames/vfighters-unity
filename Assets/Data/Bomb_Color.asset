@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Bomb_Color
   m_EditorClassIdentifier: 
   type: 5
+  isBomb: 1
   prefab: {fileID: 3555836019713278289, guid: e9b48fcd43acef7498e49c286251a6e7, type: 3}
   spawnRatio: 1

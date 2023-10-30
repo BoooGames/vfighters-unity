@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Bomb_BlockA
   m_EditorClassIdentifier: 
   type: 1
+  isBomb: 1
   prefab: {fileID: 3201842848757920703, guid: ebc2fcf6d79ac8f438306737372d90e9, type: 3}
   spawnRatio: 3

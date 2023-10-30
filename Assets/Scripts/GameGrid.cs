@@ -20,18 +20,23 @@ public class GameGrid : MonoBehaviour
     [SerializeField]
     private GameObject container;
 
-    [Header("Debug")]
     [SerializeField]
-    private Block[,] grid;
+    private IVisualGrid visualGrid = null;
 
+    [Space(10)]
+    [Header("Shared Data Model")]
+    [SerializeField]
+    private List<Vector2Int> explodingKittens = new List<Vector2Int>();
+
+    [SerializeField]
+    private int[,] grid;
+
+    [Header("Debug")]
     [SerializeField]
     private BlockGroup group;
 
     Vector2Int[] checkPositions = new Vector2Int[] { new Vector2Int(0,-1), new Vector2Int(0,1), new Vector2Int(1,0), new Vector2Int(-1,0)};
 
-    //Debug!
-    [SerializeField]
-    private List<Block> explodingKittens = new List<Block>();
 
     public BlockGroup GetCurrentPiece()
     {
@@ -40,7 +45,9 @@ public class GameGrid : MonoBehaviour
 
     void Awake()
     {
-        grid = new Block[sizeY, sizeX];
+        grid = new int[sizeY, sizeX];
+        visualGrid = GetComponentInChildren<IVisualGrid>();
+        visualGrid.Initialize(sizeX, sizeY, container);
     }
 
     [ContextMenu("Spawn")]
@@ -55,7 +62,6 @@ public class GameGrid : MonoBehaviour
     [ContextMenu("Next")]
     public bool Tick(float delta)
     {
-
         //TODO: When rotating this should be ordered by y or else...
         for(int i = group.blocks.Count - 1; i >= 0; i--)
         {
@@ -84,43 +90,38 @@ public class GameGrid : MonoBehaviour
         return true;
     }
 
-    public bool CanMoveTo(int posX, int posY)
-    {
-        return grid[posY, posX] == null;
-    }
-
     public bool CanMoveTo(Vector2 pos)
     {
         var gridPosition = ToGridPosition(pos);
-        return IsInGridRange(gridPosition) && grid[gridPosition.y, gridPosition.x] == null;
+        return IsInGridRange(gridPosition) && grid[gridPosition.y, gridPosition.x].DecodeCellType() == BlockType.Empty;
     }
 
     private void LockBlock(Block b)
     {
         var pos = ToGridPosition(b);
-        b.transform.localPosition = new Vector3(pos.x, pos.y, 0);
-        grid[pos.y, pos.x] = b;
+        grid[pos.y, pos.x] = BlockDataHelper.Encode(b.GetBlockType(), b.GetIsBomb(), 0);
 
-        if(b.GetBlockType() == BlockType.X || b.isBomb)
+        if(b.GetIsBomb())
         {
-            explodingKittens.Add(b);
+            explodingKittens.Add(pos);
         }
+
+        visualGrid.AddBlockAt(pos, b);
     }
 
     public void ProcessExplosions()
     {
         for(int i = explodingKittens.Count - 1; i >= 0; i--)
         {
-            if(explodingKittens[i] == null)
+            var pos = explodingKittens[i];
+            
+            if(grid[pos.y, pos.x].DecodeCellType() == BlockType.Empty)
             {
                 explodingKittens.RemoveAt(i);
                 continue;
             }
 
-            Block b = explodingKittens[i];
-            var pos = ToGridPosition(b);
-
-            if(b.GetBlockType() == BlockType.X)
+            if(grid[pos.y, pos.x].DecodeCellType() == BlockType.X)
             {
                 var adjacents = GetAdjacentBlocks(pos, BlockType.Empty);
 
@@ -128,20 +129,15 @@ public class GameGrid : MonoBehaviour
                 {
                     explodingKittens.RemoveAt(i);
 
-                    BoomColor(adjacents[0].GetBlockType(), pos);
-                    DestroyBlock(b);
+                    BoomColor( grid[adjacents[0].y, adjacents[0].x].DecodeCellType(), pos);
+                    DestroyBlock(pos);
 
                     RearrangeGrid();
-                }
-                else
-                {
-                    b.transform.localPosition = new Vector3(pos.x, pos.y, 0);
-                    grid[pos.y, pos.x] = b;
                 }
             }
             else
             {
-                List<Block> bombing = Boom(b);
+                List<Vector2Int> bombing = Boom(pos);
                 
                 if(bombing.Count > 0)
                 {
@@ -151,7 +147,7 @@ public class GameGrid : MonoBehaviour
                     {
                         DestroyBlock(gb);
                     }
-                    DestroyBlock(b);
+                    DestroyBlock(pos);
 
                     RearrangeGrid();
                 }
@@ -159,29 +155,25 @@ public class GameGrid : MonoBehaviour
         }
     }
 
-    public List<Block> Boom(Block bombBlock)
+    public List<Vector2Int> Boom(Vector2Int bombBlock)
     {
-        List<Block> boomBlocks = new List<Block>();
+        List<Vector2Int> boomBlocks = new List<Vector2Int>();
 
         bool[,] checkedPositions = new bool[sizeY, sizeX];
-        Queue<Block> checkingBlocks = new Queue<Block>();
+        Queue<Vector2Int> checkingBlocks = new Queue<Vector2Int>();
         checkingBlocks.Enqueue(bombBlock);
-
-        var pos = ToGridPosition(bombBlock);
-        checkedPositions[pos.y, pos.x] = true;
+        checkedPositions[bombBlock.y, bombBlock.x] = true;
 
         while(checkingBlocks.Count > 0)
         {
-            Block b = checkingBlocks.Dequeue();
-            List<Block> adjacent = GetAdjacentBlocks(ToGridPosition(b), bombBlock.GetBlockType());
+            Vector2Int b = checkingBlocks.Dequeue();
+            List<Vector2Int> adjacent = GetAdjacentBlocks(ToGridPosition(b), grid[b.y, b.x].DecodeCellType());
 
             foreach(var ab in adjacent)
             {
-                Vector2Int abPos = ToGridPosition(ab);
-
-                if(!checkedPositions[abPos.y, abPos.x])
+                if(!checkedPositions[ab.y, ab.x])
                 {
-                    checkedPositions[abPos.y, abPos.x] = true;
+                    checkedPositions[ab.y, ab.x] = true;
                     checkingBlocks.Enqueue(ab);
                     boomBlocks.Add(ab);
                 }
@@ -197,17 +189,17 @@ public class GameGrid : MonoBehaviour
         {
             for(int x = 0; x < grid.GetLength(1); x++)
             {
-                if(grid[y,x] != null && grid[y,x].GetBlockType() == type)
+                if(grid[y,x].DecodeCellType() != BlockType.Empty && grid[y,x].DecodeCellType() == type)
                 {
-                    DestroyBlock(grid[y,x]);
+                    DestroyBlock(new Vector2Int(x,y));
                 }
             }
         }
     }
 
-    private List<Block> GetAdjacentBlocks(Vector2Int gridPosition, BlockType type)
+    private List<Vector2Int> GetAdjacentBlocks(Vector2Int gridPosition, BlockType type)
     {
-        List<Block> adjacentBlocks = new List<Block>();
+        List<Vector2Int> adjacentBlocks = new List<Vector2Int>();
 
         foreach(var cp in checkPositions)
         {
@@ -215,13 +207,13 @@ public class GameGrid : MonoBehaviour
 
             if(IsInGridRange(adjacentPosition))
             {
-                var block = grid[adjacentPosition.y, adjacentPosition.x];
+                var block = grid[adjacentPosition.y, adjacentPosition.x].DecodeCellType();
 
-                if(block != null)
+                if(block != BlockType.Empty)
                 {
-                    if(type == BlockType.Empty || type == block.GetBlockType())
+                    if(type == BlockType.Empty || type == block)
                     {
-                        adjacentBlocks.Add(block);
+                        adjacentBlocks.Add(adjacentPosition);
                     }
                 }
             }
@@ -230,17 +222,11 @@ public class GameGrid : MonoBehaviour
         return adjacentBlocks;
     }
 
-    private void DestroyBlock(Block b)
+    //TODO: NETCODE!
+    private void DestroyBlock(Vector2Int pos)
     {
-        var pos = ToGridPosition(b);
-        var rb = grid[pos.y,pos.x];
-        Destroy(b.gameObject);
-        grid[pos.y,pos.x] = null;
-    }
-
-    private bool IsInGridRange(Vector2Int position)
-    {
-        return position.x >= 0 && position.x < sizeX && position.y >= 0 && position.y < sizeY;
+        grid[pos.y,pos.x] = 0;
+        visualGrid.RemoveBlockAt(pos);
     }
 
     public void RearrangeGrid()
@@ -251,7 +237,7 @@ public class GameGrid : MonoBehaviour
 
             for(int y = 0; y < grid.GetLength(0); y++)
             {
-                if(grid[y,x] == null)
+                if(grid[y,x].DecodeCellType() == BlockType.Empty)
                 {
                     if(y < freeY)
                     {
@@ -264,8 +250,9 @@ public class GameGrid : MonoBehaviour
                     if(y > freeY)
                     {
                         grid[freeY,x] = grid[y,x];
-                        grid[y,x] = null;
-                        grid[freeY,x].transform.localPosition = new Vector3(x, freeY, 0);
+                        grid[y,x] = 0;
+
+                        visualGrid.MoveBlock(new Vector2Int(x,y), new Vector2Int(x, freeY));
                         freeY++;
                     }   
                 }
@@ -273,6 +260,7 @@ public class GameGrid : MonoBehaviour
         }
     }
 
+#region GridHelpers
     public Vector2Int ToGridPosition(Block block)
     {
         return new Vector2Int( Mathf.CeilToInt(block.transform.localPosition.x), Mathf.CeilToInt(block.transform.localPosition.y));
@@ -287,4 +275,10 @@ public class GameGrid : MonoBehaviour
     {
         return new Vector2Int( Mathf.CeilToInt(position.x), Mathf.CeilToInt(position.y));
     }
+
+    public bool IsInGridRange(Vector2Int position)
+    {
+        return position.x >= 0 && position.x < sizeX && position.y >= 0 && position.y < sizeY;
+    }
+#endregion
 }
